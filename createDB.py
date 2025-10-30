@@ -40,8 +40,9 @@ def create_database():
         cursor = conn.cursor()
         
         # Check if database exists
-        cursor.execute("SELECT 1 FROM pg_database WHERE datname = %s", (DB_CONFIG['dbname'],))
+        cursor.execute("SELECT * FROM pg_database WHERE datname = %s", (DB_CONFIG['dbname'],))
         exists = cursor.fetchone()
+        print(exists)
         
         if not exists:
             cursor.execute(sql.SQL("CREATE DATABASE {}").format(
