@@ -3,15 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>DB Admin GUI</title>
-  <style>
-    body { font-family: sans-serif; margin: 20px; }
-    section { margin-bottom: 32px; padding: 16px; border: 1px solid #ddd; border-radius: 8px; }
-    h2 { margin-top: 0; }
-    table { border-collapse: collapse; width: 100%; margin-top: 8px; }
-    th, td { border: 1px solid #ccc; padding: 6px 8px; }
-    form > div { margin: 6px 0; }
-    button { margin-left: 8px; }
-  </style>
+  <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
   <h1>Commencement Database Admin</h1>
@@ -24,10 +16,9 @@
       <div><input placeholder="Email" name="email" type="email" required></div>
       <div><input placeholder="Degree Name" name="degree_name"></div>
       <div><input placeholder="Degree Type" name="degree_type"></div>
-      <div>
-        <label>
-          <input type="checkbox" name="opt_in_biometric"> Opt-in biometric
-        </label>
+      <div class="toggle">
+          <input type="checkbox" name="opt_in_biometric" id="opt_in_biometric">
+          <label for="opt_in_biometric">Opt-in Biometric</label>
       </div>
       <button type="submit">Insert Student</button>
     </form>
