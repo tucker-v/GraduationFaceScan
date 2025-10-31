@@ -27,6 +27,7 @@ DB_PORT=5432
 ```console
 python setup.py
 ```
+#### Open "http://127.0.0.1:8000/" to view API
 
 ### test server running
 
@@ -40,9 +41,14 @@ curl 127.0.0.1:8000/students/
 ```
 
 ### Open "web/admin.html" in browser
+http://127.0.0.1:5500/web/admin.html 
+- (Might not work, I'm using live server VSCode extension)
 
+### *Use pgAdmin 4 to view database and double check everything*
 ## How to shutdown everything
+
 ### CTRL + C in your terminal to shutdown API server
+
 ### To delete DB (After Stopping API Server)
 ```console
 python shutDown.py
