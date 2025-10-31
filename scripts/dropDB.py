@@ -133,12 +133,6 @@ def main():
     print("⚠️  This action is IRREVERSIBLE and will permanently delete all data!")
     print("\nMake sure you have a backup before proceeding.")
     
-    confirmation = input("\nType the database name to confirm deletion: ").strip()
-    
-    if confirmation != config['dbname']:
-        print("\n✗ Database name does not match. Deletion cancelled.")
-        return
-    
     final_confirm = input("\nAre you absolutely sure? Type 'YES' to proceed: ").strip()
     
     if final_confirm != 'YES':
