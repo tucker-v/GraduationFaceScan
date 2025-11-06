@@ -10,7 +10,7 @@ def main():
         print(f"[!] Missing script: {SCRIPT.resolve()}")
         sys.exit(1)
 
-    print("WARNING: This will DROP the database configured in db_config.json.")
+    print("WARNING: This will DROP the database configured from your .env.")
     confirm = input("Type 'DROP' to continue: ").strip()
     if confirm != "DROP":
         print("[i] Aborted.")

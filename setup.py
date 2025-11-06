@@ -40,7 +40,7 @@ def uvicorn_stream():
     for _ in range(40):
         try:
             import urllib.request
-            with urllib.request.urlopen(f"http://{HOST}:{PORT}/", timeout=0.5) as r:
+            with urllib.request.urlopen(f"http://{HOST}:{PORT}/health", timeout=0.5) as r:
                 if r.status == 200:
                     print("[+] API is up.")
                     return proc
@@ -48,6 +48,35 @@ def uvicorn_stream():
             time.sleep(0.25)
     print("[!] API did not respond yet; continuing.")
     return proc
+
+
+def setup_frontend():
+    """
+    Changes into the GFS-Frontend directory, installs dependencies, builds the project,
+    and returns to the original directory.
+    """
+    original_dir = os.getcwd()
+    frontend_dir = os.path.join(original_dir, "GFS-Frontend")
+    
+    try:
+        # Change to frontend directory
+        os.chdir(frontend_dir)
+        print(f"Changed directory to {frontend_dir}")
+
+        # Install npm dependencies
+        subprocess.run(["npm", "install"], check=True)
+        print("npm install completed")
+
+        # Build the project
+        subprocess.run(["npm", "run", "build"], check=True)
+        print("npm run build completed")
+
+    except subprocess.CalledProcessError as e:
+        print(f"Error during frontend setup: {e}")
+    finally:
+        # Change back to original directory
+        os.chdir(original_dir)
+        print(f"Returned to original directory {original_dir}")
 
 def main():
     # Sanity checks
@@ -71,8 +100,12 @@ def main():
     step("Step 3: Insert sample data")
     run_or_fail([sys.executable, str(POPULATE)])
 
-    # 4) Start API and open GUI
-    step("Step 4: Start API server")
+    # 4) build frontend
+    step("Step 4: Compiling sve")
+    setup_frontend()
+
+    # 5) Start API and open GUI
+    step("Step 5: Start API server")
     proc = uvicorn_stream()
 
     print("\nAll set. Use Ctrl+C to stop the API.")

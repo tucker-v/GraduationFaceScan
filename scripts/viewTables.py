@@ -1,6 +1,7 @@
 import psycopg2
 import pandas as pd
 import json
+from createDB import load_db_config
 
 
 '''
@@ -8,8 +9,7 @@ May or may not work properly depending on system
 
 '''
 # Load database config
-with open("db_config.json") as f:
-    config = json.load(f)
+config = load_db_config()
 
 # Connect to database
 conn = psycopg2.connect(**config)
