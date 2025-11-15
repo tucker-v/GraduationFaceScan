@@ -1,4 +1,5 @@
 <script>
+    import CameraCapture from "../components/CameraCapture.svelte";
     // form state
     let pid = "";
     let name = "";
@@ -161,6 +162,11 @@
         <input id="optedIn" type="checkbox" bind:checked={optedIn} />
         <label for="optedIn">Opted In (Biometric)</label>
     </div>
+    {#if optedIn}
+    <div>
+        <CameraCapture/>
+    </div>
+    {/if}
 
     <div>
         <button type="submit" disabled={submitting}>
