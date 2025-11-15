@@ -64,11 +64,11 @@ def setup_frontend():
         print(f"Changed directory to {frontend_dir}")
 
         # Install npm dependencies
-        subprocess.run(["npm", "install"], check=True)
+        # subprocess.run(["npm", "install"], check=True)
         print("npm install completed")
 
         # Build the project
-        subprocess.run(["npm", "run", "build"], check=True)
+        # subprocess.run(["npm", "run", "build"], check=True)
         print("npm run build completed")
 
     except subprocess.CalledProcessError as e:

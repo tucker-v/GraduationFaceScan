@@ -1,11 +1,13 @@
 <script>
   import { onMount } from 'svelte';
 
-  let students = $state([]);
-  let loading = $state(true);
-  let error = $state(null);
+  let students = [];
+  let loading = true;
+  let error = null;
 
-  onMount(async () => {
+  async function loadStudents() {
+    loading = true;
+    error = null;
     try {
       const res = await fetch('/api/students/');
       if (!res.ok) {
@@ -18,7 +20,25 @@
     } finally {
       loading = false;
     }
-  });
+  }
+
+  async function deleteStudent(pid) {
+    if (!confirm(`Delete student ${pid}?`)) return;
+    try {
+      const res = await fetch(`/api/students/${encodeURIComponent(pid)}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Delete failed: ${res.status}`);
+      }
+      // update local list
+      students = students.filter(s => String(s.PID) !== String(pid));
+    } catch (err) {
+      console.error(err);
+      error = err.message;
+    }
+  }
+
+  onMount(loadStudents);
 </script>
 
 <section class="admin">
@@ -43,6 +63,7 @@
           <th>Degree</th>
           <th>Type</th>
           <th>Opted In (Biometric)</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -54,6 +75,7 @@
             <td>{s.degree_name}</td>
             <td>{s.degree_type}</td>
             <td>{s.opt_in_biometric ? 'Yes' : 'No'}</td>
+            <td><button class="delete" on:click={() => deleteStudent(s.PID)}>Delete</button></td>
           </tr>
         {/each}
       </tbody>
@@ -99,5 +121,18 @@
   .error {
     color: #dc2626;
     text-align: center;
+  }
+
+  .delete {
+    background: #ef4444;
+    color: #fff;
+    border: none;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+  }
+
+  .delete:hover {
+    background: #dc2626;
   }
 </style>
