@@ -66,6 +66,11 @@ def create_tables():
     try:
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor()
+
+        # Enable PGVector extension
+        cursor.execute(""" 
+            CREATE EXTENSION IF NOT EXISTS vector;
+        """)
         
         # Drop tables if they exist (for fresh start)
         cursor.execute("""
@@ -121,6 +126,7 @@ def create_tables():
                 SPID VARCHAR(20) NOT NULL,
                 storage_uri VARCHAR(500) NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                embedding vector(512),
                 FOREIGN KEY (SPID) REFERENCES STUDENT(PID) ON DELETE CASCADE
             );
         """)
@@ -160,3 +166,7 @@ def create_tables():
         
     except Exception as e:
         print(f"✗ Error creating tables: {e}")
+
+# if __name__ == "__main__":
+#     create_database()
+#     create_tables()

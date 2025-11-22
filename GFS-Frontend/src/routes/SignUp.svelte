@@ -7,6 +7,7 @@
     let degree = "";
     let type = "";
     let optedIn = false;
+    let capturedImage = null
 
     // UI state
     let submitting = false;
@@ -37,6 +38,7 @@
         }
         if (!degree) errors.degree = "Please select a degree.";
         if (!type) errors.type = "Please select a type.";
+        if (optedIn && !capturedImage) errors.photo = "Please take a photo"
         return Object.keys(errors).length === 0;
     }
 
@@ -62,6 +64,7 @@
                     degree_name: degree,
                     degree_type: type,
                     opt_in_biometric: optedIn,
+                    photo: capturedImage,
                 }),
             });
 
@@ -163,8 +166,17 @@
         <label for="optedIn">Opted In (Biometric)</label>
     </div>
     {#if optedIn}
-    <div>
-        <CameraCapture/>
+    <div style="margin-bottom: 10px;">
+        {#if capturedImage}
+            <div class="image-container">
+            <h3>Preview:</h3>
+            <img src={capturedImage} alt="Captured frame" />
+            <button on:click={() => {capturedImage = null}}>Retake</button>
+        </div>
+        {:else}
+        <CameraCapture onCapture = {(image) => {capturedImage = image}}/>
+        {/if}
+        {#if errors.photo}<div class="error">{errors.photo}</div>{/if}
     </div>
     {/if}
 
@@ -250,4 +262,34 @@
         opacity: 0.6;
         cursor: not-allowed;
     }
+
+    .image-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px; /* optional max width */
+    margin: 0 auto;    /* center container */
+  }
+
+  .image-container img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .image-container button {
+    position: absolute;
+    bottom: 10px;         /* distance from bottom of video */
+    left: 50%;            /* start at horizontal center */
+    transform: translateX(-50%); /* center the button horizontally */
+    padding: 0.5rem 1rem;
+    background: #424b56;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+  }
 </style>

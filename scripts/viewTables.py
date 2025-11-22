@@ -14,12 +14,14 @@ config = load_db_config()
 # Connect to database
 conn = psycopg2.connect(**config)
 
-# View STUDENT table
-student_df = pd.read_sql_query("SELECT * FROM student", conn)
-print("STUDENT TABLE:\n", student_df)
+cursor = conn.cursor()
 
-# View QUEUED table
-queued_df = pd.read_sql_query("SELECT * FROM queued", conn)
-print("\nQUEUED TABLE:\n", queued_df)
+cursor.execute("""SELECT * FROM FACE_IMAGE""")
 
+row = cursor.fetchall()
+print(row)
+
+
+conn.commit()
+cursor.close()
 conn.close()

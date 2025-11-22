@@ -4,11 +4,13 @@
   import Home from './routes/Home.svelte';
   import SignUp from './routes/SignUp.svelte';
   import Admin from './routes/Admin.svelte';
+  import Match from './routes/Match.svelte'
 
   const routes = {
     '/': Home,
     '/signup': SignUp,
-    '/admin': Admin
+    '/admin': Admin,
+    '/match': Match
   };
 </script>
 

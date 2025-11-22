@@ -8,6 +8,7 @@ class StudentIn(BaseModel):
     degree_name: Optional[str] = None
     degree_type: Optional[str] = None
     opt_in_biometric: bool = False
+    photo: Optional[str] = None
 
 class StudentOut(BaseModel):
     PID: str
@@ -35,3 +36,6 @@ class StaffIn(BaseModel):
 
 class StaffOut(StaffIn):
     pass
+
+class MatchIn(BaseModel):
+    photo: str

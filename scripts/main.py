@@ -1,4 +1,6 @@
 from createDB import *  
+import random
+import pickle
 
 '''
 Run to test
@@ -72,7 +74,7 @@ def insert_sample_data():
         print(f"✓ Inserted {len(staff)} staff members.")
         
         # Insert FACE_IMAGES (for students who opted in)
-        face_images = [
+        face_images_no_emb = [
             ('PID001', '/images/faces/PID001_face.jpg'),
             ('PID002', '/images/faces/PID002_face.jpg'),
             ('PID003', '/images/faces/PID003_face.jpg'),
@@ -92,10 +94,22 @@ def insert_sample_data():
             ('PID021', '/images/faces/PID021_face.jpg'),
             ('PID022', '/images/faces/PID022_face.jpg'),
         ]
-        
+
+        script_dir = os.path.dirname(os.path.abspath(__file__))  # folder containing this script
+        embeddings_dir = os.path.join(script_dir, "embeddings.pkl") 
+
+        with open(embeddings_dir, "rb") as f:
+            loaded_embeddings = pickle.load(f)
+
+
+        face_images = [
+            (pid, path, emb)
+            for (pid, path), emb in zip(face_images_no_emb, loaded_embeddings)
+        ]
+
         cursor.executemany("""
-            INSERT INTO FACE_IMAGE (SPID, storage_uri)
-            VALUES (%s, %s)
+            INSERT INTO FACE_IMAGE (SPID, storage_uri, embedding)
+            VALUES (%s, %s, %s)
         """, face_images)
         print(f"✓ Inserted {len(face_images)} face images.")
         
