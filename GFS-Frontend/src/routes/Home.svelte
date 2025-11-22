@@ -10,6 +10,7 @@
     <a href="/signup" use:link>Sign Up</a>
     <a href="/match" use:link>Match</a>
     <a href="/admin" use:link>Admin</a>
+    <a href="/ceremony" use:link>Ceremony</a>
   </nav>
 </section>
 

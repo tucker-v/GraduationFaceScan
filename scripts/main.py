@@ -11,31 +11,94 @@ def insert_sample_data():
     try:
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor()
+
+        # Insert CEREMONIES
+        ceremonies = [
+            ('Fall 2025 College of Engineering Ceremony', '2025-05-15 10:00:00', 'Lane Stadium', '10:00:00', '12:00:00'),
+            ('Fall 2025 College of Science Ceremony', '2025-05-15 14:00:00', 'Lane Stadium', '14:00:00', '16:00:00'),
+            ('Fall 2025 College of Business Ceremony', '2025-12-18 10:00:00', 'Cassell Coliseum', '10:00:00', '12:00:00'),
+            ('Fall 2025 College of Arts Ceremony', '2025-12-18 14:00:00', 'Cassell Coliseum', '14:00:00', '16:00:00'),
+        ]
+        
+        cursor.executemany("""
+            INSERT INTO CEREMONY (name, date_time, location, start_time, end_time)
+            VALUES (%s, %s, %s, %s, %s)
+        """, ceremonies)
+        print(f"✓ Inserted {len(ceremonies)} ceremonies.")
+
+        degrees = [
+            # Engineering (1)
+            ('Computer Science', 1),
+            ('Computer Engineering', 1),
+            ('Electrical Engineering', 1),
+            ('Mechanical Engineering', 1),
+            ('Industrial & Systems Engineering', 1),
+            ('Chemical Engineering', 1),
+            ('Civil Engineering', 1),
+            ('Aerospace Engineering', 1),
+            ('Materials Science & Engineering', 1),
+
+            # Science (2)
+            ('Biology', 2),
+            ('Chemistry', 2),
+            ('Physics', 2),
+            ('Mathematics', 2),
+            ('Statistics', 2),
+            ('Biochemistry', 2),
+            ('Neuroscience', 2),
+            ('Geosciences', 2),
+
+            # Business (3)
+            ('Accounting', 3),
+            ('Finance', 3),
+            ('Marketing', 3),
+            ('Management', 3),
+            ('Business Information Technology', 3),
+            ('Economics', 3),
+
+            # Arts (4)
+            ('English', 4),
+            ('History', 4),
+            ('Philosophy', 4),
+            ('Political Science', 4),
+            ('Sociology', 4),
+            ('Psychology', 4),
+            ('Communication', 4),
+            ('Studio Art', 4),
+            ('Music', 4),
+        ]
+
+        cursor.executemany("""
+            INSERT INTO DEGREE (degree_name, ceremony_id)
+            VALUES (%s, %s)
+        """, degrees)
+        print(f"✓ Inserted {len(degrees)} degrees.")
+
         
         # Insert STUDENTS (20+ records)
         students = [
-            ('PID001', 'John Smith', 'jsmith@vt.edu', 'Computer Science', 'BS', True),
+            ('PID001', 'John Smith', 'jsmith@vt.edu', 'Economics', 'BS', True),
             ('PID002', 'Emily Johnson', 'ejohnson@vt.edu', 'Computer Science', 'MS', True),
             ('PID003', 'Michael Brown', 'mbrown@vt.edu', 'Electrical Engineering', 'BS', True),
-            ('PID004', 'Sarah Davis', 'sdavis@vt.edu', 'Computer Science', 'PhD', False),
-            ('PID005', 'David Wilson', 'dwilson@vt.edu', 'Information Systems', 'BS', True),
+            ('PID004', 'Sarah Davis', 'sdavis@vt.edu', 'Management', 'PhD', False),
+            ('PID005', 'David Wilson', 'dwilson@vt.edu', 'Communication', 'BS', True),
             ('PID006', 'Jessica Martinez', 'jmartinez@vt.edu', 'Computer Science', 'MS', True),
-            ('PID007', 'James Anderson', 'janderson@vt.edu', 'Software Engineering', 'BS', True),
-            ('PID008', 'Ashley Taylor', 'ataylor@vt.edu', 'Computer Science', 'BS', True),
-            ('PID009', 'Christopher Thomas', 'cthomas@vt.edu', 'Data Science', 'MS', False),
-            ('PID010', 'Amanda Jackson', 'ajackson@vt.edu', 'Computer Science', 'BS', True),
-            ('PID011', 'Matthew White', 'mwhite@vt.edu', 'Cybersecurity', 'BS', True),
-            ('PID012', 'Jennifer Harris', 'jharris@vt.edu', 'Computer Science', 'MS', True),
-            ('PID013', 'Daniel Martin', 'dmartin@vt.edu', 'Computer Science', 'BS', True),
-            ('PID014', 'Lauren Thompson', 'lthompson@vt.edu', 'Information Technology', 'BS', False),
-            ('PID015', 'Joshua Garcia', 'jgarcia@vt.edu', 'Computer Science', 'PhD', True),
-            ('PID016', 'Nicole Martinez', 'nmartinez@vt.edu', 'Software Engineering', 'MS', True),
-            ('PID017', 'Andrew Robinson', 'arobinson@vt.edu', 'Computer Science', 'BS', True),
-            ('PID018', 'Stephanie Clark', 'sclark@vt.edu', 'Data Science', 'BS', True),
-            ('PID019', 'Ryan Rodriguez', 'rrodriguez@vt.edu', 'Computer Science', 'BS', True),
-            ('PID020', 'Michelle Lewis', 'mlewis@vt.edu', 'Information Systems', 'MS', False),
-            ('PID021', 'Kevin Lee', 'klee@vt.edu', 'Computer Science', 'BS', True),
-            ('PID022', 'Rachel Walker', 'rwalker@vt.edu', 'Computer Science', 'MS', True),
+            ('PID007', 'James Anderson', 'janderson@vt.edu', 'Mathematics', 'BS', True),
+            ('PID008', 'Ashley Taylor', 'ataylor@vt.edu', 'Finance', 'BS', True),
+            ('PID009', 'Christopher Thomas', 'cthomas@vt.edu', 'Civil Engineering', 'MS', False),
+            ('PID010', 'Amanda Jackson', 'ajackson@vt.edu', 'Business Information Technology', 'BS', True),
+            ('PID011', 'Matthew White', 'mwhite@vt.edu', 'Business Information Technology', 'BS', True),
+            ('PID012', 'Jennifer Harris', 'jharris@vt.edu', 'Marketing', 'MS', True),
+            ('PID013', 'Daniel Martin', 'dmartin@vt.edu', 'Political Science', 'BS', True),
+            ('PID014', 'Lauren Thompson', 'lthompson@vt.edu', 'Business Information Technology', 'BS', False),
+            ('PID015', 'Joshua Garcia', 'jgarcia@vt.edu', 'Statistics', 'PhD', True),
+            ('PID016', 'Nicole Martinez', 'nmartinez@vt.edu', 'Sociology', 'MS', True),
+            ('PID017', 'Andrew Robinson', 'arobinson@vt.edu', 'Geosciences', 'BS', True),
+            ('PID018', 'Stephanie Clark', 'sclark@vt.edu', 'Biology', 'BS', True),
+            ('PID019', 'Ryan Rodriguez', 'rrodriguez@vt.edu', 'Chemical Engineering', 'BS', True),
+            ('PID020', 'Michelle Lewis', 'mlewis@vt.edu', 'Chemical Engineering', 'MS', False),
+            ('PID021', 'Kevin Lee', 'klee@vt.edu', 'Studio Art', 'BS', True),
+            ('PID022', 'Rachel Walker', 'rwalker@vt.edu', 'Physics', 'MS', True),
         ]
         
         cursor.executemany("""
@@ -44,19 +107,7 @@ def insert_sample_data():
         """, students)
         print(f"✓ Inserted {len(students)} students.")
         
-        # Insert CEREMONIES
-        ceremonies = [
-            ('Spring 2025 Undergraduate Ceremony', '2025-05-15 10:00:00', 'Lane Stadium', '10:00:00', '12:00:00'),
-            ('Spring 2025 Graduate Ceremony', '2025-05-15 14:00:00', 'Lane Stadium', '14:00:00', '16:00:00'),
-            ('Fall 2025 Undergraduate Ceremony', '2025-12-18 10:00:00', 'Cassell Coliseum', '10:00:00', '12:00:00'),
-            ('Fall 2025 Graduate Ceremony', '2025-12-18 14:00:00', 'Cassell Coliseum', '14:00:00', '16:00:00'),
-        ]
         
-        cursor.executemany("""
-            INSERT INTO CEREMONY (name, date_time, location, start_time, end_time)
-            VALUES (%s, %s, %s, %s, %s)
-        """, ceremonies)
-        print(f"✓ Inserted {len(ceremonies)} ceremonies.")
         
         # Insert STAFF
         staff = [
@@ -131,28 +182,28 @@ def insert_sample_data():
         
         # Insert QUEUED relationships (students registered for ceremonies)
         queued = [
-            ('PID001', 1, '2025-05-15 09:30:00', 'checked_in'),
-            ('PID002', 2, '2025-05-15 13:45:00', 'pending'),
-            ('PID003', 1, '2025-05-15 09:25:00', 'checked_in'),
-            ('PID004', 2, '2025-05-15 13:30:00', 'pending'),
-            ('PID005', 1, '2025-05-15 09:40:00', 'checked_in'),
-            ('PID006', 2, '2025-05-15 13:50:00', 'pending'),
-            ('PID007', 1, '2025-05-15 09:35:00', 'checked_in'),
-            ('PID008', 1, '2025-05-15 09:45:00', 'checked_in'),
-            ('PID009', 2, '2025-05-15 13:40:00', 'pending'),
-            ('PID010', 1, '2025-05-15 09:28:00', 'checked_in'),
-            ('PID011', 1, '2025-05-15 09:32:00', 'checked_in'),
-            ('PID012', 2, '2025-05-15 13:42:00', 'pending'),
-            ('PID013', 1, '2025-05-15 09:38:00', 'checked_in'),
-            ('PID014', 1, '2025-05-15 09:50:00', 'pending'),
-            ('PID015', 2, '2025-05-15 13:35:00', 'pending'),
-            ('PID016', 2, '2025-05-15 13:38:00', 'pending'),
-            ('PID017', 1, '2025-05-15 09:42:00', 'checked_in'),
-            ('PID018', 1, '2025-05-15 09:48:00', 'checked_in'),
-            ('PID019', 1, '2025-05-15 09:33:00', 'checked_in'),
-            ('PID020', 2, '2025-05-15 13:48:00', 'pending'),
-            ('PID021', 1, '2025-05-15 09:36:00', 'checked_in'),
-            ('PID022', 2, '2025-05-15 13:52:00', 'pending'),
+            ('PID001', 1, '2025-05-15 09:30:00', 'called'),
+            ('PID002', 2, '2025-05-15 13:45:00', 'called'),
+            ('PID003', 1, '2025-05-15 09:25:00', 'called'),
+            ('PID004', 2, '2025-05-15 13:30:00', 'called'),
+            ('PID005', 1, '2025-05-15 09:40:00', 'called'),
+            ('PID006', 2, '2025-05-15 13:50:00', 'called'),
+            ('PID007', 1, '2025-05-15 09:35:00', 'called'),
+            ('PID008', 1, '2025-05-15 09:45:00', 'called'),
+            ('PID009', 2, '2025-05-15 13:40:00', 'called'),
+            ('PID010', 1, '2025-05-15 09:28:00', 'called'),
+            ('PID011', 1, '2025-05-15 09:32:00', 'called'),
+            ('PID012', 2, '2025-05-15 13:42:00', 'called'),
+            ('PID013', 1, '2025-05-15 09:38:00', 'called'),
+            ('PID014', 1, '2025-05-15 09:50:00', 'called'),
+            ('PID015', 2, '2025-05-15 13:35:00', 'called'),
+            ('PID016', 2, '2025-05-15 13:38:00', 'called'),
+            ('PID017', 1, '2025-05-15 09:42:00', 'called'),
+            ('PID018', 1, '2025-05-15 09:48:00', 'called'),
+            ('PID019', 1, '2025-05-15 09:33:00', 'called'),
+            ('PID020', 2, '2025-05-15 13:48:00', 'called'),
+            ('PID021', 1, '2025-05-15 09:36:00', 'called'),
+            ('PID022', 2, '2025-05-15 13:52:00', 'called'),
         ]
         
         cursor.executemany("""
@@ -175,7 +226,7 @@ def verify_data():
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor()
         
-        tables = ['STUDENT', 'CEREMONY', 'STAFF', 'FACE_IMAGE', 'MANAGES', 'QUEUED']
+        tables = ['STUDENT', 'DEGREE', 'CEREMONY', 'STAFF', 'FACE_IMAGE', 'MANAGES', 'QUEUED']
         
         print("\n" + "="*50)
         print("DATABASE VERIFICATION")

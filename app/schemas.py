@@ -27,6 +27,11 @@ class CeremonyIn(BaseModel):
 
 class CeremonyOut(CeremonyIn):
     ceremony_id: int
+    name: str
+    date_time: str
+    location: str
+    start_time: str
+    end_time: str
 
 class StaffIn(BaseModel):
     staff_id: str
@@ -39,3 +44,9 @@ class StaffOut(StaffIn):
 
 class MatchIn(BaseModel):
     photo: str
+
+class QueueIn(BaseModel):
+    SPID: str
+
+class DequeueIn(BaseModel):
+    ceremony_id: int

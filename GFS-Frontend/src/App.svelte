@@ -4,13 +4,15 @@
   import Home from './routes/Home.svelte';
   import SignUp from './routes/SignUp.svelte';
   import Admin from './routes/Admin.svelte';
-  import Match from './routes/Match.svelte'
+  import Match from './routes/Match.svelte';
+  import Ceremony from './routes/Ceremony.svelte';
 
   const routes = {
     '/': Home,
     '/signup': SignUp,
     '/admin': Admin,
-    '/match': Match
+    '/match': Match,
+    '/ceremony': Ceremony,
   };
 </script>
 

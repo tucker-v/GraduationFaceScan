@@ -7,6 +7,40 @@
     let submitting = null;
     let matchFound = null;
 
+    async function queueStudent() {
+        if (!matchFound) {
+            return;
+        }
+        try {
+            const resp = await fetch("/api/queue/push", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    SPID: matchFound.PID,
+                }),
+            });
+
+            if (!resp.ok) {
+                const body = await resp.json().catch(() => ({}));
+                throw new Error(
+                    body.message || `Server returned ${resp.status}`,
+                );
+            }
+            successMessage = (await resp.json()).message;
+        } catch (err) {
+            successMessage = null;
+            if (err.message === "Server returned 409") {
+                errorMessage = "Student is already queued"
+            } else {
+            errorMessage = `Queueing failed: ${err.message}`;
+            }
+        } finally {
+            submitting = false;
+        }
+
+
+    }
+
     async function handleSubmit(e) {
         e.preventDefault();
 
@@ -72,15 +106,6 @@
                 </button>
             </div>
         {/if}
-
-        <div id="form-status" class="meta" role="status" aria-live="polite">
-            {#if successMessage}
-                <div class="success">{successMessage}</div>
-            {/if}
-            {#if errorMessage}
-                <div class="server-error">{errorMessage}</div>
-            {/if}
-        </div>
     {:else}
         <h2>Match Found</h2>
         <div class="match-details">
@@ -95,7 +120,7 @@
             </p>
         </div>
 
-        <div style="margin-top: 1rem;">
+        <div class="button-container">
             <button
                 type="button"
                 on:click={() => {
@@ -107,8 +132,23 @@
             >
                 Reset
             </button>
+
+            <button
+                type="button"
+                on:click={queueStudent}
+            >
+                Queue
+            </button>
         </div>
     {/if}
+    <div id="form-status" class="meta" role="status" aria-live="polite">
+            {#if successMessage}
+                <div class="success">{successMessage}</div>
+            {/if}
+            {#if errorMessage}
+                <div class="server-error">{errorMessage}</div>
+            {/if}
+    </div>
 </form>
 
 <style>
@@ -173,5 +213,12 @@
         padding: 1rem;
         border-radius: 6px;
         margin-bottom: 1rem;
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-top: 2rem;
     }
 </style>

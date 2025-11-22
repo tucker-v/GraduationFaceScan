@@ -79,22 +79,11 @@ def create_tables():
             DROP TABLE IF EXISTS FACE_IMAGE CASCADE;
             DROP TABLE IF EXISTS STUDENT CASCADE;
             DROP TABLE IF EXISTS CEREMONY CASCADE;
+            DROP TABLE IF EXISTS DEGREE CASCADE;
             DROP TABLE IF EXISTS STAFF CASCADE;
         """)
         
-        # Create STUDENT table
-        cursor.execute("""
-            CREATE TABLE STUDENT (
-                PID VARCHAR(20) PRIMARY KEY,
-                name VARCHAR(100) NOT NULL,
-                email VARCHAR(100) UNIQUE NOT NULL,
-                degree_name VARCHAR(100),
-                degree_type VARCHAR(50),
-                opt_in_biometric BOOLEAN DEFAULT FALSE
-            );
-        """)
-        print("✓ STUDENT table created.")
-        
+                       
         # Create CEREMONY table
         cursor.execute("""
             CREATE TABLE CEREMONY (
@@ -107,6 +96,31 @@ def create_tables():
             );
         """)
         print("✓ CEREMONY table created.")
+
+
+        # Create DEGREE table
+        cursor.execute("""
+            CREATE TABLE DEGREE (
+                degree_name VARCHAR(100) PRIMARY KEY,
+                ceremony_id INTEGER,
+                FOREIGN KEY (ceremony_id) REFERENCES CEREMONY(ceremony_id) ON DELETE SET NULL
+            );
+        """)
+        print("✓ DEGREE table created.")
+
+        # Create STUDENT table
+        cursor.execute("""
+            CREATE TABLE STUDENT (
+                PID VARCHAR(20) PRIMARY KEY,
+                name VARCHAR(100) NOT NULL,
+                email VARCHAR(100) UNIQUE NOT NULL,
+                degree_name VARCHAR(100),
+                degree_type VARCHAR(50),
+                opt_in_biometric BOOLEAN DEFAULT FALSE,
+                FOREIGN KEY (degree_name) REFERENCES DEGREE(degree_name)
+            );
+        """)
+        print("✓ STUDENT table created.")
         
         # Create STAFF table
         cursor.execute("""
@@ -126,7 +140,7 @@ def create_tables():
                 SPID VARCHAR(20) NOT NULL,
                 storage_uri VARCHAR(500) NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                embedding vector(512),
+                embedding vector(512) NOT NULL,
                 FOREIGN KEY (SPID) REFERENCES STUDENT(PID) ON DELETE CASCADE
             );
         """)

@@ -16,7 +16,7 @@ conn = psycopg2.connect(**config)
 
 cursor = conn.cursor()
 
-cursor.execute("""SELECT * FROM FACE_IMAGE""")
+cursor.execute("""SELECT * FROM QUEUED""")
 
 row = cursor.fetchall()
 print(row)

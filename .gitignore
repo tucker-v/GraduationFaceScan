@@ -4,4 +4,6 @@ db_config.json
 
 /__pycache__
 
+**/__pycache__/
+
 /app/images/faces/*
