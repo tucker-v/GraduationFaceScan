@@ -4,9 +4,15 @@ import json
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import os
+
+# NEW: for password hashing
+from passlib.hash import bcrypt
+
+
 '''
 Creates DB
 '''
+
 
 def load_db_config():
     """Load database configuration from .env file"""
@@ -26,8 +32,10 @@ def load_db_config():
     
     return config
 
+
 # Load configuration from JSON file
 DB_CONFIG = load_db_config()
+
 
 def create_database():
     """Create the database if it doesn't exist"""
@@ -60,6 +68,7 @@ def create_database():
         conn.close()
     except Exception as e:
         print(f"✗ Error creating database: {e}")
+
 
 def create_tables():
     """Create all tables with proper constraints"""
@@ -160,3 +169,57 @@ def create_tables():
         
     except Exception as e:
         print(f"✗ Error creating tables: {e}")
+
+
+# ---------- NEW: USER_ACCOUNT + seed first admin ----------
+
+def create_user_table_and_seed_admin():
+    """
+    Create USER_ACCOUNT table (if not exists) and seed a first admin
+    if there are no users yet. Does NOT touch existing tables.
+    """
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor()
+
+        # Create USER_ACCOUNT table if it does not exist
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS USER_ACCOUNT (
+            user_id       SERIAL PRIMARY KEY,
+            username      VARCHAR(150) UNIQUE NOT NULL,
+            password_hash VARCHAR(255) NOT NULL,
+            is_admin      BOOLEAN NOT NULL DEFAULT FALSE,
+            created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+        """)
+        print("✓ USER_ACCOUNT table created (or already exists).")
+
+        # Seed first admin only if there are no users
+        cursor.execute("SELECT COUNT(*) FROM USER_ACCOUNT;")
+        count = cursor.fetchone()[0]
+        if count == 0:
+            default_username = "admin"
+            default_password = "ChangeMeNow123!"
+            default_hash = bcrypt.hash(default_password)
+
+            cursor.execute(
+                """
+                INSERT INTO USER_ACCOUNT (username, password_hash, is_admin)
+                VALUES (%s, %s, TRUE)
+                """,
+                (default_username, default_hash),
+            )
+
+            print(
+                "✓ Seeded initial admin user:\n"
+                f"   username = '{default_username}'\n"
+                f"   password = '{default_password}'\n"
+                "   (change this from the app via change-password)"
+            )
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"✗ Error creating USER_ACCOUNT / seeding admin: {e}")

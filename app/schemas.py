@@ -35,3 +35,27 @@ class StaffIn(BaseModel):
 
 class StaffOut(StaffIn):
     pass
+
+
+# -------- NEW auth / user models (append only) --------
+
+class UserSignupIn(BaseModel):
+    username: str
+    password: str
+
+class UserLoginIn(BaseModel):
+    username: str
+    password: str
+
+class UserOut(BaseModel):
+    user_id: int
+    username: str
+    is_admin: bool
+
+class ChangePasswordIn(BaseModel):
+    old_password: str
+    new_password: str
+
+class CreateAdminIn(BaseModel):
+    username: str
+    password: str
