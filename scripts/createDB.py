@@ -2,25 +2,29 @@ import psycopg2
 from psycopg2 import sql
 import json
 from datetime import datetime, timedelta
-
+from dotenv import load_dotenv
+import os
 '''
 Creates DB
 '''
 
-def load_db_config(config_file='db_config.json'):
-    """Load database configuration from JSON file"""
-    try:
-        with open(config_file, 'r') as f:
-            config = json.load(f)
-        print(f"✓ Database configuration loaded from {config_file}")
-        return config
-    except FileNotFoundError:
-        print(f"Error: {config_file} not found!")
-        print("Please create a db_config.json file with your database credentials.")
-        exit(1)
-    except json.JSONDecodeError:
-        print(f"Error: {config_file} is not valid JSON!")
-        exit(1)
+def load_db_config():
+    """Load database configuration from .env file"""
+    load_dotenv()
+    config = {
+        "dbname": os.getenv("DB_NAME"),
+        "user": os.getenv("DB_USER"),
+        "password": os.getenv("DB_PASSWORD"),
+        "host": os.getenv("DB_HOST", "localhost"),
+        "port": os.getenv("DB_PORT", "5432"),
+    }
+
+    for key, value in config.items():
+        if value is None:
+            print(f"ERROR: '{key}' not found in .env")
+            exit(1)
+    
+    return config
 
 # Load configuration from JSON file
 DB_CONFIG = load_db_config()

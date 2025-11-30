@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from app.db import get_db_connection
 from app.schemas import CeremonyIn, CeremonyOut
 
-router = APIRouter(prefix="/ceremonies", tags=["ceremonies"])
+router = APIRouter(prefix="/api/ceremonies", tags=["ceremonies"])
 
 @router.get("/", response_model=list[CeremonyOut])
 def list_ceremonies():

@@ -4,7 +4,7 @@ from app.schemas import StudentIn, StudentOut
 from psycopg2.errors import UniqueViolation
 import psycopg2
 
-router = APIRouter(prefix="/students", tags=["students"])
+router = APIRouter(prefix="/api/students", tags=["students"])
 
 @router.get("/", response_model=list[StudentOut])
 def list_students():

@@ -1,24 +1,13 @@
 import psycopg2
 from psycopg2 import sql
 import json
+from dotenv import load_dotenv
+import os
+from createDB import load_db_config
 
 '''
 Deletes DB
 '''
-
-def load_db_config(config_file='db_config.json'):
-    """Load database configuration from JSON file"""
-    try:
-        with open(config_file, 'r') as f:
-            config = json.load(f)
-        print(f"✓ Database configuration loaded from {config_file}")
-        return config
-    except FileNotFoundError:
-        print(f"Error: {config_file} not found!")
-        exit(1)
-    except json.JSONDecodeError:
-        print(f"Error: {config_file} is not valid JSON!")
-        exit(1)
 
 def terminate_database_connections(config):
     """Terminate all active connections to the database before dropping it"""

@@ -4,7 +4,7 @@ from app.schemas import StaffIn, StaffOut
 from psycopg2.errors import UniqueViolation
 import psycopg2
 
-router = APIRouter(prefix="/staff", tags=["staff"])
+router = APIRouter(prefix="/api/staff", tags=["staff"])
 
 @router.get("/", response_model=list[StaffOut])
 def list_staff():
