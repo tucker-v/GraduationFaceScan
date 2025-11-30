@@ -7,6 +7,8 @@
   let loading = true;
   let error = null;
   let selectedTable = "Students"
+  let editingRow = null;
+  let editData = {};
   
   const tables = ["Students", "Staff", "Ceremonies"]
 
@@ -96,6 +98,89 @@
     }
   }
 
+  function startEditStudent(student) {
+    editingRow = `student-${student.PID}`;
+    editData = { ...student };
+  }
+
+  function cancelEdit() {
+    editingRow = null;
+    editData = {};
+  }
+
+  async function saveStudent() {
+    try {
+      const res = await fetch(`/api/students/${encodeURIComponent(editData.PID)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editData)
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Update failed: ${res.status}`);
+      }
+      const updated = await res.json();
+      students = students.map(s => String(s.PID) === String(editData.PID) ? updated : s);
+      editingRow = null;
+      editData = {};
+    } catch (err) {
+      console.error(err);
+      error = err.message;
+    }
+  }
+
+  function startEditStaff(staffMember) {
+    editingRow = `staff-${staffMember.staff_id}`;
+    editData = { ...staffMember };
+  }
+
+  async function saveStaff() {
+    try {
+      const res = await fetch(`/api/staff/${encodeURIComponent(editData.staff_id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editData)
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Update failed: ${res.status}`);
+      }
+      const updated = await res.json();
+      staff = staff.map(s => s.staff_id === editData.staff_id ? updated : s);
+      editingRow = null;
+      editData = {};
+    } catch (err) {
+      console.error(err);
+      error = err.message;
+    }
+  }
+
+  function startEditCeremony(ceremony) {
+    editingRow = `ceremony-${ceremony.ceremony_id}`;
+    editData = { ...ceremony };
+  }
+
+  async function saveCeremony() {
+    try {
+      const res = await fetch(`/api/ceremonies/${editData.ceremony_id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editData)
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Update failed: ${res.status}`);
+      }
+      const updated = await res.json();
+      ceremonies = ceremonies.map(c => c.ceremony_id === editData.ceremony_id ? updated : c);
+      editingRow = null;
+      editData = {};
+    } catch (err) {
+      console.error(err);
+      error = err.message;
+    }
+  }
+
 </script>
 
 <section class="admin">
@@ -137,15 +222,33 @@
         </thead>
         <tbody>
           {#each students as s}
-            <tr>
-              <td>{s.PID}</td>
-              <td>{s.name}</td>
-              <td>{s.email}</td>
-              <td>{s.degree_name}</td>
-              <td>{s.degree_type}</td>
-              <td>{s.opt_in_biometric ? 'Yes' : 'No'}</td>
-              <td><button class="delete" on:click={() => deleteStudent(s.PID)}>Delete</button></td>
-            </tr>
+            {#if editingRow === `student-${s.PID}`}
+              <tr class="editing">
+                <td>{s.PID}</td>
+                <td><input type="text" bind:value={editData.name} /></td>
+                <td><input type="email" bind:value={editData.email} /></td>
+                <td><input type="text" bind:value={editData.degree_name} /></td>
+                <td><input type="text" bind:value={editData.degree_type} /></td>
+                <td><input type="checkbox" bind:checked={editData.opt_in_biometric} /></td>
+                <td>
+                  <button class="save" on:click={saveStudent}>Save</button>
+                  <button class="cancel" on:click={cancelEdit}>Cancel</button>
+                </td>
+              </tr>
+            {:else}
+              <tr>
+                <td>{s.PID}</td>
+                <td>{s.name}</td>
+                <td>{s.email}</td>
+                <td>{s.degree_name}</td>
+                <td>{s.degree_type}</td>
+                <td>{s.opt_in_biometric ? 'Yes' : 'No'}</td>
+                <td>
+                  <button class="edit" on:click={() => startEditStudent(s)}>Edit</button>
+                  <button class="delete" on:click={() => deleteStudent(s.PID)}>Delete</button>
+                </td>
+              </tr>
+            {/if}
           {/each}
         </tbody>
       </table>
@@ -160,18 +263,37 @@
             <th>Location</th>
             <th>Start Time</th>
             <th>End Time</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {#each ceremonies as c}
-            <tr>
-              <td>{c.ceremony_id}</td>
-              <td>{c.name}</td>
-              <td>{c.date_time}</td>
-              <td>{c.location}</td>
-              <td>{c.start_time}</td>
-              <td>{c.end_time}</td>
-            </tr>
+            {#if editingRow === `ceremony-${c.ceremony_id}`}
+              <tr class="editing">
+                <td>{c.ceremony_id}</td>
+                <td><input type="text" bind:value={editData.name} /></td>
+                <td><input type="datetime-local" bind:value={editData.date_time} /></td>
+                <td><input type="text" bind:value={editData.location} /></td>
+                <td><input type="time" bind:value={editData.start_time} /></td>
+                <td><input type="time" bind:value={editData.end_time} /></td>
+                <td>
+                  <button class="save" on:click={saveCeremony}>Save</button>
+                  <button class="cancel" on:click={cancelEdit}>Cancel</button>
+                </td>
+              </tr>
+            {:else}
+              <tr>
+                <td>{c.ceremony_id}</td>
+                <td>{c.name}</td>
+                <td>{c.date_time}</td>
+                <td>{c.location}</td>
+                <td>{c.start_time}</td>
+                <td>{c.end_time}</td>
+                <td>
+                  <button class="edit" on:click={() => startEditCeremony(c)}>Edit</button>
+                </td>
+              </tr>
+            {/if}
           {/each}
         </tbody>
       </table>
@@ -184,16 +306,33 @@
             <th>Name</th>
             <th>Email</th>
             <th>Status</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {#each staff as s}
-            <tr>
-              <td>{s.staff_id}</td>
-              <td>{s.name}</td>
-              <td>{s.email}</td>
-              <td>{s.status}</td>
-            </tr>
+            {#if editingRow === `staff-${s.staff_id}`}
+              <tr class="editing">
+                <td>{s.staff_id}</td>
+                <td><input type="text" bind:value={editData.name} /></td>
+                <td><input type="email" bind:value={editData.email} /></td>
+                <td><input type="text" bind:value={editData.status} /></td>
+                <td>
+                  <button class="save" on:click={saveStaff}>Save</button>
+                  <button class="cancel" on:click={cancelEdit}>Cancel</button>
+                </td>
+              </tr>
+            {:else}
+              <tr>
+                <td>{s.staff_id}</td>
+                <td>{s.name}</td>
+                <td>{s.email}</td>
+                <td>{s.status}</td>
+                <td>
+                  <button class="edit" on:click={() => startEditStaff(s)}>Edit</button>
+                </td>
+              </tr>
+            {/if}
           {/each}
         </tbody>
       </table>
@@ -284,5 +423,69 @@
 
   .delete:hover {
     background: #dc2626;
+  }
+
+  .edit {
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    margin-right: 0.3rem;
+  }
+
+  .edit:hover {
+    background: #2563eb;
+  }
+
+  .save {
+    background: #10b981;
+    color: #fff;
+    border: none;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    margin-right: 0.3rem;
+  }
+
+  .save:hover {
+    background: #059669;
+  }
+
+  .cancel {
+    background: #6b7280;
+    color: #fff;
+    border: none;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+  }
+
+  .cancel:hover {
+    background: #4b5563;
+  }
+
+  .editing {
+    background-color: #fef3c7 !important;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  }
+
+  input[type="checkbox"] {
+    width: auto;
+    cursor: pointer;
   }
 </style>
