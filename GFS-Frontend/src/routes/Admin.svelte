@@ -181,6 +181,36 @@
     }
   }
 
+  async function deleteCeremony(ceremonyId) {
+    if (!confirm(`Delete ceremony ${ceremonyId}?`)) return;
+    try {
+      const res = await fetch(`/api/ceremonies/${ceremonyId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Delete failed: ${res.status}`);
+      }
+      ceremonies = ceremonies.filter(c => c.ceremony_id !== ceremonyId);
+    } catch (err) {
+      console.error(err);
+      error = err.message;
+    }
+  }
+
+  async function deleteStaff(staffId) {
+    if (!confirm(`Delete staff ${staffId}?`)) return;
+    try {
+      const res = await fetch(`/api/staff/${encodeURIComponent(staffId)}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Delete failed: ${res.status}`);
+      }
+      staff = staff.filter(s => s.staff_id !== staffId);
+    } catch (err) {
+      console.error(err);
+      error = err.message;
+    }
+  }
+
 </script>
 
 <section class="admin">
@@ -291,6 +321,7 @@
                 <td>{c.end_time}</td>
                 <td>
                   <button class="edit" on:click={() => startEditCeremony(c)}>Edit</button>
+                  <button class="delete" on:click={() => deleteCeremony(c.ceremony_id)}>Delete</button>
                 </td>
               </tr>
             {/if}
@@ -330,6 +361,7 @@
                 <td>{s.status}</td>
                 <td>
                   <button class="edit" on:click={() => startEditStaff(s)}>Edit</button>
+                  <button class="delete" on:click={() => deleteStaff(s.staff_id)}>Delete</button>
                 </td>
               </tr>
             {/if}
