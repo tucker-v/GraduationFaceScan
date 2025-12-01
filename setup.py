@@ -52,11 +52,11 @@ def uvicorn_stream():
 
 def setup_frontend():
     """
-    Changes into the GFS-Frontend directory, installs dependencies, builds the project,
+    Changes into the frontend directory, installs dependencies, builds the project,
     and returns to the original directory.
     """
     original_dir = os.getcwd()
-    frontend_dir = os.path.join(original_dir, "GFS-Frontend")
+    frontend_dir = os.path.join(original_dir, "frontend")
     
     try:
         # Change to frontend directory
