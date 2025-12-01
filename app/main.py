@@ -11,7 +11,7 @@ import os
 
 app = FastAPI(title="Commencement DB Admin")
 
-frontend_path = os.path.join(os.path.dirname(__file__), "../GFS-Frontend/dist")
+frontend_path = os.path.join(os.path.dirname(__file__), "../frontend/dist")
 
 app.add_middleware(
     CORSMiddleware,

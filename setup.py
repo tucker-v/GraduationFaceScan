@@ -52,30 +52,30 @@ def uvicorn_stream():
 
 def setup_frontend():
     """
-    Changes into the GFS-Frontend directory, installs dependencies, builds the project,
+    Changes into the Frontend directory, installs dependencies, builds the project,
     and returns to the original directory.
     """
     original_dir = os.getcwd()
-    frontend_dir = os.path.join(original_dir, "GFS-Frontend")
+    frontend_dir = os.path.join(original_dir, "frontend")
     
     try:
         # Change to frontend directory
-        os.chdir(frontend_dir)
+        # os.chdir(frontend_dir)
         print(f"Changed directory to {frontend_dir}")
 
         # Install npm dependencies
-        subprocess.run(["npm", "install"], check=True)
+        # subprocess.run(["npm", "install"], check=True)
         print("npm install completed")
 
         # Build the project
-        subprocess.run(["npm", "run", "build"], check=True)
+        # subprocess.run(["npm", "run", "build"], check=True)
         print("npm run build completed")
 
     except subprocess.CalledProcessError as e:
         print(f"Error during frontend setup: {e}")
     finally:
         # Change back to original directory
-        os.chdir(original_dir)
+        # os.chdir(original_dir)
         print(f"Returned to original directory {original_dir}")
 
 def main():

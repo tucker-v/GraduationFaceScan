@@ -1,13 +1,12 @@
 fastapi
-
 uvicorn
-
 psycopg2-binary
-
 python-dotenv
-
 pydantic
-
 email-validator
-
 insightface
+onnxruntime
+
+# Explicit pins to avoid binary incompatibility errors with insightface/skimage
+numpy==1.26.4
+scikit-image==0.22.0
