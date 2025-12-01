@@ -421,6 +421,9 @@
   </div>
 
   {#if showAddAdmin}
+    <!-- Just to get rid of the warnings-->
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="modal-backdrop" on:click|self={closeAddAdmin}>
       <div class="modal">
         <h3>Add New Admin</h3>
