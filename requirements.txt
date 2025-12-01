@@ -8,6 +8,7 @@ passlib
 
 # For admin
 bcrypt>=4.0,<5.0
+PyJWT>=2.8,<3.0
 
 # For face recognition stack (used by other environments in the project)
 insightface
