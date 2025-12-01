@@ -54,6 +54,38 @@ def insert_student(student: StudentIn):
     finally:
         cur.close(); conn.close()
 
+@router.put("/{pid}", response_model=StudentOut)
+def update_student(pid: str, student: StudentIn):
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            UPDATE STUDENT 
+            SET name = %s, email = %s, degree_name = %s, degree_type = %s, opt_in_biometric = %s
+            WHERE PID = %s
+            RETURNING PID, name, email, degree_name, degree_type, opt_in_biometric
+            """,
+            (student.name, student.email, student.degree_name, student.degree_type, student.opt_in_biometric, pid),
+        )
+        row = cur.fetchone()
+        conn.commit()
+        if not row:
+            raise HTTPException(status_code=404, detail="Student not found")
+        return {
+            "PID": row[0], "name": row[1], "email": row[2],
+            "degree_name": row[3], "degree_type": row[4],
+            "opt_in_biometric": row[5]
+        }
+    except UniqueViolation:
+        conn.rollback()
+        raise HTTPException(status_code=409, detail="Email already exists")
+    except psycopg2.Error as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cur.close(); conn.close()
+
 @router.delete("/{pid}")
 def delete_student(pid: str):
     conn = get_db_connection()
