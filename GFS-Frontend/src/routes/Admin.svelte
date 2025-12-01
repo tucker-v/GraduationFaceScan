@@ -1,17 +1,65 @@
 <script>
-  import { onMount } from 'svelte';
+  import { authFetch } from '../lib/authFetch';
+  import { token, user, isAuthenticated, isAdmin } from "../stores/auth";
+  import { push } from "svelte-spa-router";
 
   let students = [];
   let ceremonies = [];
-  let staff = []
+  let staff = [];
   let loading = true;
   let error = null;
-  let selectedTable = "Students"
+  let selectedTable = "Students";
   let editingRow = null;
   let editData = {};
-  
-  const tables = ["Students", "Staff", "Ceremonies"]
 
+  // UI state for Add New Admin modal
+  let showAddAdmin = false;
+  let newAdminUsername = "";
+  let newAdminPassword = "";
+  let newAdminMessage = "";
+  let newAdminError = "";
+
+  const tables = ["Students", "Staff", "Ceremonies"];
+
+  // Create-form state per table
+  let newStudent = {
+    PID: "",
+    name: "",
+    email: "",
+    degree_name: "",
+    degree_type: "",
+    opt_in_biometric: false
+  };
+  let studentCreateError = "";
+  let studentCreateMessage = "";
+
+  let newCeremony = {
+    name: "",
+    date_time: "",
+    location: "",
+    start_time: "",
+    end_time: ""
+  };
+  let ceremonyCreateError = "";
+  let ceremonyCreateMessage = "";
+
+  let newStaff = {
+    staff_id: "",
+    name: "",
+    email: "",
+    status: "active"
+  };
+  let staffCreateError = "";
+  let staffCreateMessage = "";
+
+  // Guard: only authenticated admins can access
+  $: if (!$isAuthenticated) {
+    push("/login");
+  } else if (!$isAdmin) {
+    push("/");
+  }
+
+  // Load table data when selection changes
   $: switch (selectedTable) {
     case "Students":
       loadStudents();
@@ -24,10 +72,9 @@
       break;
   }
 
-
   async function loadCeremonies() {
-    students = []
-    staff = []
+    students = [];
+    staff = [];
     loading = true;
     error = null;
     try {
@@ -45,8 +92,8 @@
   }
 
   async function loadStaff() {
-    students = []
-    staff = []
+    students = [];
+    staff = [];
     loading = true;
     error = null;
     try {
@@ -64,8 +111,8 @@
   }
 
   async function loadStudents() {
-    staff = []
-    ceremonies = []
+    staff = [];
+    ceremonies = [];
     loading = true;
     error = null;
     try {
@@ -90,7 +137,6 @@
         const text = await res.text();
         throw new Error(text || `Delete failed: ${res.status}`);
       }
-      // update local list
       students = students.filter(s => String(s.PID) !== String(pid));
     } catch (err) {
       console.error(err);
@@ -211,17 +257,198 @@
     }
   }
 
+  async function handleLogout() {
+    try {
+      await authFetch("/api/auth/logout", { method: "POST" });
+    } catch (e) {
+      // ignore
+    }
+    token.set(null);
+    user.set(null);
+    push("/login");
+  }
+
+  function openAddAdmin() {
+    showAddAdmin = true;
+    newAdminUsername = "";
+    newAdminPassword = "";
+    newAdminMessage = "";
+    newAdminError = "";
+  }
+
+  function closeAddAdmin() {
+    showAddAdmin = false;
+    newAdminUsername = "";
+    newAdminPassword = "";
+    newAdminMessage = "";
+    newAdminError = "";
+  }
+
+  async function createAdminUser(event) {
+    event.preventDefault();
+    newAdminMessage = "";
+    newAdminError = "";
+
+    try {
+      const res = await authFetch("/api/auth/admin/create", {
+        method: "POST",
+        body: JSON.stringify({
+          username: newAdminUsername,
+          password: newAdminPassword
+        })
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `Failed (${res.status})`);
+      }
+
+      const data = await res.json();
+      newAdminMessage = `Admin '${data.username}' created.`;
+      newAdminUsername = "";
+      newAdminPassword = "";
+    } catch (err) {
+      newAdminError = err.message;
+    }
+  }
+
+  async function createStudent(e) {
+    e.preventDefault();
+    studentCreateError = "";
+    studentCreateMessage = "";
+    try {
+      const res = await authFetch("/api/students/", {
+        method: "POST",
+        body: JSON.stringify(newStudent)
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `Failed (${res.status})`);
+      }
+      const created = await res.json();
+      students = [...students, created];
+      studentCreateMessage = `Student ${created.PID} added.`;
+      newStudent = {
+        PID: "",
+        name: "",
+        email: "",
+        degree_name: "",
+        degree_type: "",
+        opt_in_biometric: false
+      };
+    } catch (err) {
+      studentCreateError = err.message;
+    }
+  }
+
+  async function createCeremony(e) {
+    e.preventDefault();
+    ceremonyCreateError = "";
+    ceremonyCreateMessage = "";
+    try {
+      const res = await authFetch("/api/ceremonies/", {
+        method: "POST",
+        body: JSON.stringify(newCeremony)
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `Failed (${res.status})`);
+      }
+      const created = await res.json();
+      ceremonies = [...ceremonies, created];
+      ceremonyCreateMessage = `Ceremony ${created.ceremony_id} added.`;
+      newCeremony = {
+        name: "",
+        date_time: "",
+        location: "",
+        start_time: "",
+        end_time: ""
+      };
+    } catch (err) {
+      ceremonyCreateError = err.message;
+    }
+  }
+
+  async function createStaff(e) {
+    e.preventDefault();
+    staffCreateError = "";
+    staffCreateMessage = "";
+    try {
+      const res = await authFetch("/api/staff/", {
+        method: "POST",
+        body: JSON.stringify(newStaff)
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `Failed (${res.status})`);
+      }
+      const created = await res.json();
+      staff = [...staff, created];
+      staffCreateMessage = `Staff ${created.staff_id} added.`;
+      newStaff = {
+        staff_id: "",
+        name: "",
+        email: "",
+        status: "active"
+      };
+    } catch (err) {
+      staffCreateError = err.message;
+    }
+  }
 </script>
 
 <section class="admin">
   <div class="row">
-    <h2>Admin Dashboard</h2>
-    <select bind:value={selectedTable}>
+    <div class="row-left">
+      <h2>Admin Dashboard</h2>
+      <button type="button" class="add-admin" on:click={openAddAdmin}>
+        Add New Admin
+      </button>
+    </div>
+    <div class="row-right">
+      <button type="button" class="profile-btn" on:click={() => push("/admin/profile")}>
+        Admin Profile
+      </button>
+      <button type="button" class="logout-btn" on:click={handleLogout}>
+        Logout
+      </button>
+      <select bind:value={selectedTable}>
         {#each tables as table}
           <option value={table}>{table}</option>
         {/each}
-    </select>
+      </select>
+    </div>
   </div>
+
+  {#if showAddAdmin}
+    <div class="modal-backdrop" on:click|self={closeAddAdmin}>
+      <div class="modal">
+        <h3>Add New Admin</h3>
+        <form on:submit|preventDefault={createAdminUser}>
+          <label>
+            Username
+            <input type="text" bind:value={newAdminUsername} required />
+          </label>
+          <label>
+            Password
+            <input type="password" bind:value={newAdminPassword} required />
+          </label>
+
+          {#if newAdminError}
+            <div class="error">{newAdminError}</div>
+          {/if}
+          {#if newAdminMessage}
+            <div class="success">{newAdminMessage}</div>
+          {/if}
+
+          <div class="modal-actions">
+            <button type="submit">Create Admin</button>
+            <button type="button" class="cancel" on:click={closeAddAdmin}>Close</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  {/if}
 
   {#if loading}
     <p>Loading {selectedTable}...</p>
@@ -238,6 +465,26 @@
   {:else}
 
     {#if selectedTable === "Students"}
+      <div class="create-panel">
+        <h3>Add Student</h3>
+        <form on:submit|preventDefault={createStudent}>
+          <div class="grid">
+            <input placeholder="PID" bind:value={newStudent.PID} required />
+            <input placeholder="Name" bind:value={newStudent.name} required />
+            <input placeholder="Email" type="email" bind:value={newStudent.email} required />
+            <input placeholder="Degree" bind:value={newStudent.degree_name} />
+            <input placeholder="Type" bind:value={newStudent.degree_type} />
+            <label class="checkbox-inline">
+              <input type="checkbox" bind:checked={newStudent.opt_in_biometric} />
+              Opt-in Biometric
+            </label>
+          </div>
+          {#if studentCreateError}<div class="error">{studentCreateError}</div>{/if}
+          {#if studentCreateMessage}<div class="success">{studentCreateMessage}</div>{/if}
+          <button type="submit">Add Student</button>
+        </form>
+      </div>
+
       <table>
         <thead>
           <tr>
@@ -284,6 +531,26 @@
       </table>
 
     {:else if selectedTable === "Ceremonies"}
+      <div class="create-panel">
+        <h3>Add Ceremony</h3>
+        <form on:submit|preventDefault={createCeremony}>
+          <div class="grid">
+            <input placeholder="Name" bind:value={newCeremony.name} required />
+            <input
+              placeholder="Date & Time (YYYY-MM-DD HH:MM:SS)"
+              bind:value={newCeremony.date_time}
+              required
+            />
+            <input placeholder="Location" bind:value={newCeremony.location} required />
+            <input placeholder="Start Time (HH:MM:SS)" bind:value={newCeremony.start_time} required />
+            <input placeholder="End Time (HH:MM:SS)" bind:value={newCeremony.end_time} required />
+          </div>
+          {#if ceremonyCreateError}<div class="error">{ceremonyCreateError}</div>{/if}
+          {#if ceremonyCreateMessage}<div class="success">{ceremonyCreateMessage}</div>{/if}
+          <button type="submit">Add Ceremony</button>
+        </form>
+      </div>
+
       <table>
         <thead>
           <tr>
@@ -330,7 +597,22 @@
       </table>
 
     {:else if selectedTable === "Staff"}
-        <table>
+      <div class="create-panel">
+        <h3>Add Staff</h3>
+        <form on:submit|preventDefault={createStaff}>
+          <div class="grid">
+            <input placeholder="Staff ID" bind:value={newStaff.staff_id} required />
+            <input placeholder="Name" bind:value={newStaff.name} required />
+            <input placeholder="Email" type="email" bind:value={newStaff.email} required />
+            <input placeholder="Status" bind:value={newStaff.status} />
+          </div>
+          {#if staffCreateError}<div class="error">{staffCreateError}</div>{/if}
+          {#if staffCreateMessage}<div class="success">{staffCreateMessage}</div>{/if}
+          <button type="submit">Add Staff</button>
+        </form>
+      </div>
+
+      <table>
         <thead>
           <tr>
             <th>Staff ID</th>
@@ -368,10 +650,6 @@
           {/each}
         </tbody>
       </table>
-
-
-
-
     {/if}
 
   {/if}
@@ -385,8 +663,7 @@
   }
 
   h2 {
-    text-align: center;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   table {
@@ -411,7 +688,6 @@
     outline: none;
     cursor: pointer;
     transition: border-color 0.2s ease;
-    margin-bottom: 0.5rem;
   }
 
   select:hover {
@@ -420,14 +696,22 @@
 
   .row {
     display: flex;
-    align-items: center;     
-    justify-content: space-between; 
-    gap: 1rem;              
-    padding: 0.5rem 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0 1rem 0;
   }
 
-  .row h2 {
-    margin: 0;              
+  .row-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .row-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
 
   th {
@@ -442,6 +726,12 @@
   .error {
     color: #dc2626;
     text-align: center;
+  }
+
+  .success {
+    color: #16a34a;
+    text-align: center;
+    margin-top: 0.5rem;
   }
 
   .delete {
@@ -519,5 +809,130 @@
   input[type="checkbox"] {
     width: auto;
     cursor: pointer;
+  }
+
+  .add-admin,
+  .profile-btn,
+  .logout-btn {
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .add-admin {
+    background-color: #3b82f6;
+  }
+
+  .add-admin:hover {
+    background-color: #2563eb;
+  }
+
+  .profile-btn {
+    background-color: #3b82f6;
+  }
+
+  .profile-btn:hover {
+    background-color: #2563eb;
+  }
+
+  .logout-btn {
+    background-color: #ef4444;
+  }
+
+  .logout-btn:hover {
+    background-color: #dc2626;
+  }
+
+  .create-panel {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    background: #111827;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .create-panel h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .create-panel .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .checkbox-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.9rem;
+  }
+
+  /* Modal styles */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+  }
+
+  .modal {
+    background: #ffffff;
+    color: #111827;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  .modal h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .modal label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+
+  .modal input {
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .modal-actions button {
+    padding: 0.45rem 0.9rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .modal-actions button:first-child {
+    background-color: #3b82f6;
+    color: #fff;
+  }
+
+  .modal-actions .cancel {
+    background-color: #6b7280;
+    color: #fff;
   }
 </style>
