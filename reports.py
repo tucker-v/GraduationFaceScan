@@ -171,13 +171,38 @@ def get_students_per_ceremony():
     return labels, values, cleaned_rows
 
 
-# ---------- Chart helper ----------
+# ---------- Ceremony type mapping ----------
+
+def map_ceremony_to_type(ceremony_name: str) -> str:
+    """
+    Map full ceremony name to a broad type.
+    Adjust the matching rules to your actual ceremony names.
+    """
+    if not ceremony_name:
+        return "OTHER"
+
+    name_lower = ceremony_name.lower()
+
+    if "business" in name_lower:
+        return "BUS"
+    if "engineer" in name_lower:
+        return "ENG"
+    if "science" in name_lower:
+        return "SCI"
+    if "art" in name_lower:
+        return "ART"
+
+    return "OTHER"
+
+
+# ---------- Generic pie chart helper ----------
 
 def make_pie_chart(labels, values, title, legend_title, filename):
     if not labels or not values:
         print(f"No data found for chart: {title}")
         return
 
+    # Default 3-letter slice labels from the full labels
     slice_labels = [str(lbl)[:3].upper() for lbl in labels]
 
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -191,6 +216,7 @@ def make_pie_chart(labels, values, title, legend_title, filename):
         labeldistance=1.05
     )
 
+    # Make room for legend on the right, enlarge visible pie area
     plt.subplots_adjust(left=0.05, right=0.7)
 
     ax.legend(
@@ -275,20 +301,49 @@ def main():
         filename="biometric_opt_in.png",
     )
 
-    # 5) Students per ceremony
+    # 5) Students per ceremony — use BUS/ENG/SCI/ART on slices
     cer_labels, cer_values, cer_rows = get_students_per_ceremony()
     save_csv(
         headers=["ceremony_name", "num_students"],
         rows=cer_rows,
         filename="students_per_ceremony.csv",
     )
-    make_pie_chart(
-        cer_labels,
-        cer_values,
-        title="Students per Ceremony",
-        legend_title="Ceremony",
-        filename="students_per_ceremony.png",
-    )
+
+    if cer_labels and cer_values:
+        cer_type_labels = [map_ceremony_to_type(name) for name in cer_labels]
+
+        fig, ax = plt.subplots(figsize=(10, 5))
+
+        wedges, text_labels, autotexts = ax.pie(
+            cer_values,
+            labels=cer_type_labels,  # BUS / ENG / SCI / ART / OTHER
+            startangle=90,
+            autopct="%1.1f%%",
+            rotatelabels=True,
+            labeldistance=1.05
+        )
+
+        plt.subplots_adjust(left=0.05, right=0.7)
+
+        # Legend shows full ceremony names
+        ax.legend(
+            wedges,
+            cer_labels,
+            title="Ceremony",
+            loc="center left",
+            bbox_to_anchor=(1.0, 0.5),
+            borderaxespad=0.0,
+        )
+
+        ax.set_title("Students per Ceremony")
+        ax.axis("equal")
+
+        img_path = os.path.join(REPORTS_DIR, "students_per_ceremony.png")
+        fig.savefig(img_path, dpi=200, bbox_inches="tight")
+        plt.close(fig)
+        print(f"Saved chart: {img_path}")
+    else:
+        print("No data found for chart: Students per Ceremony")
 
 
 if __name__ == "__main__":
