@@ -46,6 +46,38 @@ def insert_ceremony(c: CeremonyIn):
         "end_time": str(row[5]),
     }
 
+@router.put("/{ceremony_id}", response_model=CeremonyOut)
+def update_ceremony(ceremony_id: int, c: CeremonyIn):
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            UPDATE CEREMONY 
+            SET name = %s, date_time = %s, location = %s, start_time = %s, end_time = %s
+            WHERE ceremony_id = %s
+            RETURNING ceremony_id, name, date_time, location, start_time, end_time
+            """,
+            (c.name, c.date_time, c.location, c.start_time, c.end_time, ceremony_id),
+        )
+        row = cur.fetchone()
+        conn.commit()
+        if not row:
+            raise HTTPException(status_code=404, detail="Ceremony not found")
+        return {
+            "ceremony_id": row[0],
+            "name": row[1],
+            "date_time": row[2].isoformat(),
+            "location": row[3],
+            "start_time": str(row[4]),
+            "end_time": str(row[5]),
+        }
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cur.close(); conn.close()
+
 @router.delete("/{ceremony_id}")
 def delete_ceremony(ceremony_id: int):
     conn = get_db_connection(); cur = conn.cursor()

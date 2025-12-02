@@ -4,9 +4,16 @@ psycopg2-binary
 python-dotenv
 pydantic
 email-validator
+passlib
+
+# For admin
+bcrypt>=4.0,<5.0
+PyJWT>=2.8,<3.0
+
+# For face recognition stack (used by other environments in the project)
 insightface
 onnxruntime
 
-# Explicit pins to avoid binary incompatibility errors with insightface/skimage
+# Explicit pins to avoid binary incompatibility issues
 numpy==1.26.4
 scikit-image==0.22.0

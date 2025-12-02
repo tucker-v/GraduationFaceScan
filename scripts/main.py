@@ -1,10 +1,11 @@
 from createDB import *  
 import random
-import pickle
+import pickle  
 
 '''
 Run to test
 '''
+
 
 def insert_sample_data():
     """Insert at least 20 sample records into major tables"""
@@ -220,13 +221,14 @@ def insert_sample_data():
     except Exception as e:
         print(f"✗ Error inserting sample data: {e}")
 
+
 def verify_data():
-    """Verify the data was inserted correctly"""
+    """Verify the data was inserted correctly, including user accounts"""
     try:
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor()
         
-        tables = ['STUDENT', 'DEGREE', 'CEREMONY', 'STAFF', 'FACE_IMAGE', 'MANAGES', 'QUEUED']
+        tables = ['STUDENT', 'DEGREE', 'CEREMONY', 'STAFF', 'FACE_IMAGE', 'MANAGES', 'QUEUED', 'USER_ACCOUNT']
         
         print("\n" + "="*50)
         print("DATABASE VERIFICATION")
@@ -236,6 +238,13 @@ def verify_data():
             cursor.execute(f"SELECT COUNT(*) FROM {table}")
             count = cursor.fetchone()[0]
             print(f"{table}: {count} records")
+
+        # Extra: show basic info about user accounts (e.g., how many admins)
+        cursor.execute("SELECT COUNT(*) FROM USER_ACCOUNT WHERE is_admin = TRUE;")
+        admin_count = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM USER_ACCOUNT WHERE is_admin = FALSE;")
+        user_count = cursor.fetchone()[0]
+        print(f"\nUSER_ACCOUNT details -> admins: {admin_count}, non-admins: {user_count}")
         
         cursor.close()
         conn.close()
@@ -244,13 +253,15 @@ def verify_data():
         print(f"✗ Error verifying data: {e}")
 
 
-
 def main():
     print("Starting PostgreSQL Database Setup...")
     print("="*50)
 
     create_database()
     create_tables()
+    # NEW: create USER_ACCOUNT table and seed the first admin
+    create_user_table_and_seed_admin()
+
     insert_sample_data()
     verify_data()
 
@@ -260,6 +271,7 @@ def main():
     print(f"\nDatabase Name: {DB_CONFIG['dbname']}")
     print(f"Host: {DB_CONFIG['host']}")
     print(f"Port: {DB_CONFIG['port']}")
+
 
 if __name__ == "__main__":
     main()
