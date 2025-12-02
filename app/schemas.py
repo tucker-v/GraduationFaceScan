@@ -8,6 +8,7 @@ class StudentIn(BaseModel):
     degree_name: Optional[str] = None
     degree_type: Optional[str] = None
     opt_in_biometric: bool = False
+    photo: Optional[str] = None
 
 class StudentOut(BaseModel):
     PID: str
@@ -26,6 +27,11 @@ class CeremonyIn(BaseModel):
 
 class CeremonyOut(CeremonyIn):
     ceremony_id: int
+    name: str
+    date_time: str
+    location: str
+    start_time: str
+    end_time: str
 
 class StaffIn(BaseModel):
     staff_id: str
@@ -36,6 +42,14 @@ class StaffIn(BaseModel):
 class StaffOut(StaffIn):
     pass
 
+class MatchIn(BaseModel):
+    photo: str
+
+class QueueIn(BaseModel):
+    SPID: str
+
+class DequeueIn(BaseModel):
+    ceremony_id: int
 
 # -------- NEW auth / user models (append only) --------
 

@@ -1,9 +1,11 @@
 <script>
-  import Router, { link } from 'svelte-spa-router';
+  import Router, {link} from 'svelte-spa-router';
 
   import Home from './routes/Home.svelte';
   import SignUp from './routes/SignUp.svelte';
   import Admin from './routes/Admin.svelte';
+  import Match from './routes/Match.svelte';
+  import Ceremony from './routes/Ceremony.svelte';
   import Login from './routes/Login.svelte';
   import AdminProfile from './routes/AdminProfile.svelte';
 
@@ -11,6 +13,8 @@
     '/': Home,
     '/signup': SignUp,
     '/admin': Admin,
+    '/match': Match,
+    '/ceremony': Ceremony,
     '/login': Login,
     '/admin/profile': AdminProfile
   };

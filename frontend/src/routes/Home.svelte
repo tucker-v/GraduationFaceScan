@@ -19,6 +19,7 @@
   <nav>
     <a href="/signup" use:link>Sign Up</a>
     <a href="/match" use:link>Match</a>
+    <a href="/ceremony" use:link>Ceremony</a>
     <button type="button" on:click={handleAdminClick}>Admin</button>
   </nav>
 </section>
