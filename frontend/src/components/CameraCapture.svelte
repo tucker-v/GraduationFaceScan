@@ -55,6 +55,7 @@
 
     <div class="camera-container">
         <!-- svelte-ignore a11y-media-has-caption -->
+        <!-- svelte-ignore element_invalid_self_closing_tag -->
         <video bind:this={videoSource} />
 
         <button on:click={capture}>Capture Image</button>

@@ -1,7 +1,6 @@
 <script>
-  import { link } from 'svelte-spa-router';
+  import { link, push } from 'svelte-spa-router';
   import { isAuthenticated, isAdmin } from "../stores/auth";
-  import { push } from "svelte-spa-router";
 
   function handleAdminClick() {
     if ($isAuthenticated && $isAdmin) {
@@ -18,9 +17,15 @@
 
   <nav>
     <a href="/signup" use:link>Sign Up</a>
-    <a href="/match" use:link>Match</a>
-    <a href="/ceremony" use:link>Ceremony</a>
-    <button type="button" on:click={handleAdminClick}>Admin</button>
+
+    {#if $isAuthenticated && $isAdmin}
+      <a href="/match" use:link>Match</a>
+      <a href="/ceremony" use:link>Ceremony</a>
+      <button type="button" on:click={handleAdminClick}>Admin</button>
+    {:else}
+      <!-- Not admin: only show Login / Admin→Login -->
+      <a href="/login" use:link>Login</a>
+    {/if}
   </nav>
 </section>
 
