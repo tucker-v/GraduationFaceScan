@@ -1,5 +1,6 @@
 <script>
     import { onMount } from "svelte";
+    import QueueView from "../components/QueueView.svelte"
 
     let ceremonies = [];
     let selectedCeremony = null;
@@ -9,6 +10,7 @@
     let currentStudent = null;
     let loadingStudent = false;
     let queueEmpty = false;
+    let showQueue = false;
 
     async function fetchCeremonies() {
         loading = true;
@@ -100,28 +102,39 @@
         Start
     </button>
 {:else}
-    <h1>{selectedCeremony.name}</h1>
+    <div class="queue-container">
+        <div class="header-row">
+            <h1>{selectedCeremony.name}</h1>
 
-    {#if currentStudent}
-        <div class="match-details">
-            <p><strong>PID:</strong> {currentStudent.PID}</p>
-            <p><strong>Name:</strong> {currentStudent.name}</p>
-            <p><strong>Degree Name:</strong> {currentStudent.degree_name}</p>
-            <p><strong>Degree Type:</strong> {currentStudent.degree_type}</p>
+            <label class="switch">
+                <input type="checkbox" bind:checked={showQueue}>
+                <span class="slider"></span>
+            </label>
         </div>
-    {:else if queueEmpty}
-        <p class="label">No students currently in the queue</p>
-    {/if}
 
-    <button
-        type="button"
-        on:click={() => {
-            getNextStudent();
-        }}
-    >
-        Next
-    </button>
-
+        {#if showQueue}
+            <QueueView ceremonyId={selectedCeremony.ceremony_id}/>
+        {:else}
+            {#if currentStudent}
+                <div class="match-details">
+                    <p><strong>PID:</strong> {currentStudent.PID}</p>
+                    <p><strong>Name:</strong> {currentStudent.name}</p>
+                    <p><strong>Degree Name:</strong> {currentStudent.degree_name}</p>
+                    <p><strong>Degree Type:</strong> {currentStudent.degree_type}</p>
+                </div>
+            {:else if queueEmpty}
+                <p class="label">No students currently in the queue</p>
+            {/if}
+                <button
+                type="button"
+                on:click={() => {
+                    getNextStudent();
+                }}
+                >
+                    Next
+                </button>
+        {/if}
+    </div>
 {/if}
 
 <style>
@@ -151,5 +164,62 @@
         padding: 1rem;
         border-radius: 6px;
         margin-bottom: 1rem;
+    }
+    .header-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 48px;
+        height: 24px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        border-radius: 24px;
+        transition: 0.3s;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        border-radius: 50%;
+        transition: 0.3s;
+    }
+
+    input:checked + .slider {
+        background-color: #4caf50;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(24px);
+    }
+    .queue-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
     }
 </style>

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from app.schemas import QueueIn, DequeueIn
+from app.schemas import QueueIn, DequeueIn, ViewQueueIn
 from app.db import get_db_connection
 import psycopg2
 
@@ -127,3 +127,64 @@ def dequeue_next_student(d: DequeueIn):
         cur.close()
         conn.close()
 
+@router.post("/view")
+def view_queue(v: ViewQueueIn):
+    conn = get_db_connection()
+
+    try:
+        cur = conn.cursor()
+
+        #get students with status pending
+        cur.execute(
+            """
+            SELECT q.status, s.PID, s.name, s.degree_name, s.degree_type, q.time_queued
+            FROM QUEUED q INNER JOIN STUDENT s
+            ON q.SPID = s.PID
+            WHERE q.ceremony_id = %s AND q.status = 'pending'
+            ORDER BY q.time_queued
+            """,
+            (v.ceremony_id,)
+        )
+        pending = cur.fetchall()
+        cur.execute(
+            """
+            SELECT q.status, s.PID, s.name, s.degree_name, s.degree_type, q.time_queued
+            FROM QUEUED q INNER JOIN STUDENT s
+            ON q.SPID = s.PID
+            WHERE q.ceremony_id = %s AND q.status = 'called'
+            ORDER BY q.time_queued
+            """,
+            (v.ceremony_id,)
+        )
+        called = cur.fetchall()
+
+        return {
+            'pending': [
+                {
+                    'PID': p[1],
+                    'name': p[2],
+                    'degree_name': p[3],
+                    'degree_type': p[4],
+                    'time_queued': p[5],
+                }
+                for p in pending
+            ],
+            'called': [
+                {
+                    'PID': c[1],
+                    'name': c[2],
+                    'degree_name': c[3],
+                    'degree_type': c[4],
+                    'time_queued': c[5],
+                }
+                for c in called
+            ]
+        }
+
+    except psycopg2.Error as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+    finally:
+        cur.close()
+        conn.close()

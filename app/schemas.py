@@ -51,6 +51,9 @@ class QueueIn(BaseModel):
 class DequeueIn(BaseModel):
     ceremony_id: int
 
+class ViewQueueIn(BaseModel):
+    ceremony_id: int
+
 # -------- NEW auth / user models (append only) --------
 
 class UserSignupIn(BaseModel):
