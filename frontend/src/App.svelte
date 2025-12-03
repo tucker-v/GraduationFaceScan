@@ -8,6 +8,7 @@
   import Ceremony from './routes/Ceremony.svelte';
   import Login from './routes/Login.svelte';
   import AdminProfile from './routes/AdminProfile.svelte';
+  import Reports from './routes/Reports.svelte';
 
   const routes = {
     '/': Home,
@@ -16,7 +17,8 @@
     '/match': Match,
     '/ceremony': Ceremony,
     '/login': Login,
-    '/admin/profile': AdminProfile
+    '/admin/profile': AdminProfile,
+    '/reports': Reports
   };
 </script>
 

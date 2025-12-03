@@ -22,6 +22,7 @@
       <a href="/match" use:link>Match</a>
       <a href="/ceremony" use:link>Ceremony</a>
       <button type="button" on:click={handleAdminClick}>Admin</button>
+      <a href="/reports" use:link>Reports</a>
     {:else}
       <!-- Not admin: only show Login / Admin→Login -->
       <a href="/login" use:link>Login</a>

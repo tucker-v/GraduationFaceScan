@@ -17,3 +17,5 @@ onnxruntime
 # Explicit pins to avoid binary incompatibility issues
 numpy==1.26.4
 scikit-image==0.22.0
+
+reportlab

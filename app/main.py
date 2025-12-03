@@ -7,6 +7,7 @@ from app.routes import degrees as degree_routes
 from app.routes import queue as queue_routes
 from app.routes import staff as staff_routes
 from app.routes import auth as auth_routes   # NEW
+from app.routes import reports as reports_routes
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -30,6 +31,7 @@ app.include_router(staff_routes.router)
 app.include_router(auth_routes.router)   # NEW
 app.include_router(degree_routes.router)
 app.include_router(queue_routes.router)
+app.include_router(reports_routes.router)
 
 @app.get("/health")
 def root():
