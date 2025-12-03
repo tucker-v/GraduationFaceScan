@@ -97,6 +97,7 @@
             degree = "";
             type = "";
             optedIn = false;
+            capturedImage = null;
         } catch (err) {
             errorMessage = `Submission failed: ${err.message}`;
         } finally {

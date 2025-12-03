@@ -159,6 +159,8 @@
         border-radius: 6px;
         cursor: pointer;
         font-weight: 600;
+        width: 30%;
+        margin: 0 auto; /* Center it */
     }
     .match-details {
         padding: 1rem;
@@ -221,5 +223,6 @@
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
+        justify-content: center;
     }
 </style>
