@@ -31,11 +31,16 @@ DB_PORT=5432
 
 ### Run
 ```console
+cd frontend
+npm run build
+cd ..
 python setup.py
+
 
 P.S admin credentials:
 user: admin
 pass: ChangeMeNow123!
+
 ```
 #### Open "http://127.0.0.1:8000/" to view API
 
