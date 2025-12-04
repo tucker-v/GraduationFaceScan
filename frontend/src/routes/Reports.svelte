@@ -2,21 +2,10 @@
     import { onMount } from "svelte";
 
     let loading = false;
-    let reports = null;
+    let reports = null;          // full array from API
+    let pieReports = [];
+    let managerialReports = [];
     let errorMessage = null;
-
-    // Managerial charts stored next to this file under src/reports/managerial
-    import overallStudentsOptin from "../reports/managerial/overall_students_optin.png";
-    import queuedPerCeremony from "../reports/managerial/queued_per_ceremony_stats.png";
-    import studentsPerCeremony from "../reports/managerial/students_per_ceremony_stats.png";
-    import studentsPerDegreeType from "../reports/managerial/students_per_degree_type_stats.png";
-
-    const managerialReports = [
-        overallStudentsOptin,
-        queuedPerCeremony,
-        studentsPerCeremony,
-        studentsPerDegreeType
-    ];
 
     async function fetchReports() {
         loading = true;
@@ -24,13 +13,17 @@
             const resp = await fetch("/api/reports/charts");
             if (!resp.ok) {
                 const body = await resp.json().catch(() => ({}));
-                throw new Error(
-                    body.detail || `Server returned ${resp.status}`,
-                );
+                throw new Error(body.detail || `Server returned ${resp.status}`);
             }
-            reports = await resp.json();
+            const data = await resp.json();
+
+            // data is an array of 10 images:
+            // [5 pie charts..., 5 managerial bar charts...]
+            reports = data || [];
+            pieReports = reports.slice(0, 5);
+            managerialReports = reports.slice(5);
         } catch (err) {
-            console.error("Failed to fetch ceremonies:", err);
+            console.error("Failed to fetch reports:", err);
             errorMessage = `Failed to load reports: ${err.message}`;
         } finally {
             loading = false;
@@ -75,23 +68,23 @@
 {:else}
     <h3>Reports</h3>
     <div class="grid">
-        {#each reports as img}
+        {#each pieReports as img, i}
             <div class="card">
-                <img src={img} alt="report chart" />
+                <img src={img} alt={`report chart ${i + 1}`} />
             </div>
         {/each}
     </div>
 
     <h3>Managerial Reports</h3>
     <div class="grid">
-        {#each managerialReports as img}
+        {#each managerialReports as img, i}
             <div class="card">
-                <img src={img} alt="managerial report chart" />
+                <img src={img} alt={`managerial report chart ${i + 1}`} />
             </div>
         {/each}
     </div>
 
-    <button on:click={downloadPDF}> Download PDF </button>
+    <button on:click={downloadPDF}>Download PDF</button>
 {/if}
 
 <style>
@@ -131,6 +124,7 @@
         border: none;
         cursor: pointer;
         font-size: 1rem;
+        margin: 1rem;
     }
 
     .error {

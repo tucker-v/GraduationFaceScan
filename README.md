@@ -1,5 +1,11 @@
 ## How to setup everything
 
+```console 
+Make sure you have C++ Build Tools installed and also have
+pgvector installed on your computer.
+
+```
+
 
 ### Create .env file
 
@@ -34,17 +40,6 @@ python setup.py
 ```console
 curl 127.0.0.1:8000/
 ```
-
-### test database connection
-```console
-curl 127.0.0.1:8000/students/
-```
-
-### Open "web/admin.html" in browser
-http://127.0.0.1:5500/web/admin.html 
-- (Might not work, I'm using live server VSCode extension)
-
-### *Use pgAdmin 4 to view database and double check everything*
 ## How to shutdown everything
 
 ### CTRL + C in your terminal to shutdown API server

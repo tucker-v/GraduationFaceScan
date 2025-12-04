@@ -6,16 +6,21 @@ import subprocess
 from pathlib import Path
 from threading import Thread
 
+
 ROOT = Path(__file__).resolve().parent
 REQS = ROOT / "requirements.txt"
 CREATE = ROOT / "scripts" / "createDB.py"
 POPULATE = ROOT / "scripts" / "main.py"
+TEST_FACIAL = ROOT / "scripts" / "testFacial.py"  # <-- added
+
 
 HOST = os.getenv("API_HOST", "127.0.0.1")
 PORT = os.getenv("API_PORT", "8000")
 
+
 def step(title):
     print(f"\n=== {title} ===")
+
 
 def run_or_fail(cmd, cwd=None):
     env = os.environ.copy()
@@ -24,6 +29,7 @@ def run_or_fail(cmd, cwd=None):
     res = subprocess.run(cmd, cwd=cwd, env=env, text=True)
     if res.returncode != 0:
         raise SystemExit(f"[!] Command failed ({res.returncode}): {' '.join(cmd)}")
+
 
 def uvicorn_stream():
     env = os.environ.copy()
@@ -59,24 +65,21 @@ def setup_frontend():
     frontend_dir = os.path.join(original_dir, "frontend")
     
     try:
-        # Change to frontend directory
         # os.chdir(frontend_dir)
         print(f"Changed directory to {frontend_dir}")
 
-        # Install npm dependencies
         # subprocess.run(["npm", "install"], check=True)
         print("npm install completed")
 
-        # Build the project
         # subprocess.run(["npm", "run", "build"], check=True)
         print("npm run build completed")
 
     except subprocess.CalledProcessError as e:
         print(f"Error during frontend setup: {e}")
     finally:
-        # Change back to original directory
         # os.chdir(original_dir)
         print(f"Returned to original directory {original_dir}")
+
 
 def main():
     # Sanity checks
@@ -84,6 +87,7 @@ def main():
         (REQS, "requirements.txt"),
         (CREATE, "scripts/createDB.py"),
         (POPULATE, "scripts/main.py"),
+        (TEST_FACIAL, "scripts/testFacial.py"),  # <-- added
     ]:
         if not p.exists():
             raise SystemExit(f"[!] Missing {desc}: {p}")
@@ -91,6 +95,10 @@ def main():
     # 1) Install dependencies
     step("Step 1: Install Python dependencies")
     run_or_fail([sys.executable, "-m", "pip", "install", "-r", str(REQS)])
+
+    # 1b) Run facial recognition test
+    step("Step 1b: Run InsightFace facial test")
+    run_or_fail([sys.executable, str(TEST_FACIAL)])
 
     # 2) Create/refresh schema
     step("Step 2: Create/refresh database schema")
@@ -119,6 +127,7 @@ def main():
             proc.wait(timeout=5)
         except Exception:
             proc.kill()
+
 
 if __name__ == "__main__":
     main()
