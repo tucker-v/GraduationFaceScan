@@ -32,6 +32,7 @@ DB_PORT=5432
 ### Run
 ```console
 cd frontend
+npm install (first time only)
 npm run build
 cd ..
 python setup.py
