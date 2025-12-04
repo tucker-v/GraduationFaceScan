@@ -5,6 +5,19 @@
     let reports = null;
     let errorMessage = null;
 
+    // Managerial charts stored next to this file under src/reports/managerial
+    import overallStudentsOptin from "../reports/managerial/overall_students_optin.png";
+    import queuedPerCeremony from "../reports/managerial/queued_per_ceremony_stats.png";
+    import studentsPerCeremony from "../reports/managerial/students_per_ceremony_stats.png";
+    import studentsPerDegreeType from "../reports/managerial/students_per_degree_type_stats.png";
+
+    const managerialReports = [
+        overallStudentsOptin,
+        queuedPerCeremony,
+        studentsPerCeremony,
+        studentsPerDegreeType
+    ];
+
     async function fetchReports() {
         loading = true;
         try {
@@ -23,6 +36,7 @@
             loading = false;
         }
     }
+
     async function downloadPDF() {
         try {
             const response = await fetch("/api/reports/download", {
@@ -35,14 +49,12 @@
             const blob = await response.blob();
             const url = URL.createObjectURL(blob);
 
-            // Create a temporary link and trigger download
             const link = document.createElement("a");
             link.href = url;
             link.download = "charts_report.pdf";
             document.body.appendChild(link);
             link.click();
 
-            // Cleanup
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
         } catch (err) {
@@ -69,6 +81,16 @@
             </div>
         {/each}
     </div>
+
+    <h3>Managerial Reports</h3>
+    <div class="grid">
+        {#each managerialReports as img}
+            <div class="card">
+                <img src={img} alt="managerial report chart" />
+            </div>
+        {/each}
+    </div>
+
     <button on:click={downloadPDF}> Download PDF </button>
 {/if}
 
@@ -100,6 +122,7 @@
         margin-bottom: 0.5rem;
         text-transform: capitalize;
     }
+
     button {
         padding: 0.6rem 1rem;
         background: #0070f3;
@@ -108,5 +131,10 @@
         border: none;
         cursor: pointer;
         font-size: 1rem;
+    }
+
+    .error {
+        color: red;
+        padding: 1rem;
     }
 </style>
