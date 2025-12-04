@@ -1,0 +1,41 @@
+services:
+  db:
+    image: ankane/pgvector:latest   # Postgres with pgvector pre-installed
+    container_name: myapp-db
+    restart: always
+    environment:
+      POSTGRES_DB: graduation_facial_recognition
+      POSTGRES_USER: gfs-user
+      POSTGRES_PASSWORD: sercure_db_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gfs-user -d graduation_facial_recognition"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    container_name: myapp-backend
+    restart: always
+    environment:
+      DB_NAME: graduation_facial_recognition
+      DB_USER: gfs-user
+      DB_PASSWORD: sercure_db_password
+      DB_HOST: db
+      DB_PORT: 5432
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app/app    # Hot reload if using dev mode
+    command: >
+      sh -c "python /app/scripts/main.py
+      && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+volumes:
+  postgres_data:
